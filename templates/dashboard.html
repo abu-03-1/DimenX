@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Magic Studio - Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #f59e0b;
+            --secondary-dark: #d97706;
+            --accent: #ec4899;
+            --dark: #0f172a;
+            --darker: #020617;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--darker), var(--dark));
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: var(--light);
+        }
+
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-text {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: white;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .ai-studio-btn {
+            background: linear-gradient(135deg, var(--accent), var(--secondary));
+        }
+
+        .logout-btn {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 50px;
+            padding: 40px 20px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent), var(--secondary));
+        }
+
+        .welcome-title {
+            font-size: 3.5rem;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+        }
+
+        .welcome-subtitle {
+            font-size: 1.3rem;
+            opacity: 0.8;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--card-border);
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            opacity: 0.8;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .upload-section {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 40px;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .upload-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .upload-title {
+            color: white;
+            margin-bottom: 25px;
+            text-align: center;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .upload-area {
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 50px 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .upload-area:hover::before {
+            left: 100%;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .upload-text {
+            margin-bottom: 20px;
+            opacity: 0.8;
+            font-size: 1.2rem;
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 0 auto;
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.5);
+        }
+
+        .upload-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .models-section {
+            color: white;
+        }
+
+        .section-title {
+            font-size: 2.2rem;
+            margin-bottom: 30px;
+            text-align: center;
+            background: linear-gradient(135deg, var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            position: relative;
+            display: inline-block;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--secondary), transparent);
+        }
+
+        .models-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+        }
+
+        .model-card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--card-border);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .model-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+
+        .model-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .model-card:hover {
+            transform: translateY(-8px);
+            background: rgba(30, 41, 59, 0.9);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .model-name {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .model-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .quality-badge {
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .quality-ULTRA {
+            background: var(--success);
+            color: white;
+        }
+
+        .quality-AI {
+            background: var(--accent);
+            color: white;
+        }
+
+        .quality-basic {
+            background: var(--warning);
+            color: black;
+        }
+
+        .model-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            text-decoration: none;
+        }
+
+        .view-btn {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+        }
+
+        .download-btn {
+            background: linear-gradient(135deg, var(--secondary), var(--secondary-dark));
+            color: white;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .no-models {
+            text-align: center;
+            color: white;
+            opacity: 0.7;
+            padding: 60px 20px;
+            grid-column: 1 / -1;
+        }
+
+        .no-models i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .floating-objects {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .floating-object {
+            position: absolute;
+            font-size: 2rem;
+            opacity: 0.1;
+            animation: floatObject 20s linear infinite;
+        }
+
+        @keyframes floatObject {
+            0% { transform: translateY(100vh) rotate(0deg); }
+            100% { transform: translateY(-100px) rotate(360deg); }
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .loading-content {
+            text-align: center;
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid var(--card-border);
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 60px;
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .quick-action-btn {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid var(--card-border);
+            color: white;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .quick-action-btn:hover {
+            transform: translateY(-3px);
+            background: rgba(99, 102, 241, 0.1);
+            border-color: var(--primary);
+        }
+
+        .quick-action-icon {
+            font-size: 2rem;
+            color: var(--primary);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .stats-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .welcome-title {
+                font-size: 2.5rem;
+            }
+            
+            .models-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .nav-buttons {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .user-info {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Particles.js Background -->
+    <div id="particles-js"></div>
+
+    <!-- Floating 3D Objects -->
+    <div class="floating-objects">
+        <div class="floating-object" style="left: 10%; animation-delay: 0s;"><i class="fas fa-cube"></i></div>
+        <div class="floating-object" style="left: 20%; animation-delay: 2s;"><i class="fas fa-dice-d20"></i></div>
+        <div class="floating-object" style="left: 30%; animation-delay: 4s;"><i class="fas fa-ring"></i></div>
+        <div class="floating-object" style="left: 40%; animation-delay: 6s;"><i class="fas fa-gem"></i></div>
+        <div class="floating-object" style="left: 50%; animation-delay: 8s;"><i class="fas fa-circle"></i></div>
+        <div class="floating-object" style="left: 60%; animation-delay: 10s;"><i class="fas fa-cube"></i></div>
+        <div class="floating-object" style="left: 70%; animation-delay: 12s;"><i class="fas fa-dice-d20"></i></div>
+        <div class="floating-object" style="left: 80%; animation-delay: 14s;"><i class="fas fa-ring"></i></div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <h3>✨ Creating Your 3D Magic</h3>
+            <p>AI is processing your image...</p>
+            <p><small>This may take 30-60 seconds</small></p>
+        </div>
+    </div>
+
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon"><i class="fas fa-cube"></i></div>
+                <div class="logo-text">3D Magic Studio</div>
+            </div>
+            <div class="user-info">
+                <div class="user-avatar">{{ username[0] | upper }}</div>
+                <span>Welcome, {{ username }}!</span>
+                <div class="nav-buttons">
+                    <a href="/ai-demo" class="nav-btn ai-studio-btn">
+                        <i class="fas fa-robot"></i> AI Studio
+                    </a>
+                    <a href="/logout" class="nav-btn logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <section class="welcome-section">
+            <h1 class="welcome-title">Transform Images into 3D Magic</h1>
+            <p class="welcome-subtitle">Upload your 2D images and watch them transform into stunning 3D models with our advanced AI technology. Create, customize, and download your creations in seconds.</p>
+        </section>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <a href="/ai-demo" class="quick-action-btn">
+                <div class="quick-action-icon"><i class="fas fa-robot"></i></div>
+                <span>AI Text to 3D</span>
+                <small>Generate from text</small>
+            </a>
+            <a href="#upload" class="quick-action-btn">
+                <div class="quick-action-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <span>Upload Image</span>
+                <small>2D to 3D conversion</small>
+            </a>
+            <a href="#models" class="quick-action-btn">
+                <div class="quick-action-icon"><i class="fas fa-cube"></i></div>
+                <span>My Models</span>
+                <small>View creations</small>
+            </a>
+        </div>
+
+        <div class="stats-section">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-cube"></i></div>
+                <div class="stat-value">{{ models | length }}</div>
+                <div class="stat-label">3D Models Created</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-star"></i></div>
+                <div class="stat-value">{{ (models | selectattr("quality", "equalto", "ULTRA") | list | length) }}</div>
+                <div class="stat-label">Ultra Quality Models</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-robot"></i></div>
+                <div class="stat-value">{{ (models | selectattr("quality", "equalto", "AI") | list | length) }}</div>
+                <div class="stat-label">AI Generated</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-bolt"></i></div>
+                <div class="stat-value">24/7</div>
+                <div class="stat-label">AI Processing</div>
+            </div>
+        </div>
+
+        <section class="upload-section" id="upload">
+            <h2 class="upload-title"><i class="fas fa-cloud-upload-alt"></i> Upload Your Image</h2>
+            <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                <div class="upload-icon"><i class="fas fa-file-upload"></i></div>
+                <div class="upload-text">Drag & drop your image here or click to browse</div>
+                <p>Supports: PNG, JPG, JPEG, BMP, WEBP (Max 50MB)</p>
+                <p><small>✅ Automatic background removal</small></p>
+                <input type="file" id="fileInput" accept=".png,.jpg,.jpeg,.bmp,.webp" style="display: none;" onchange="handleFileSelect(this.files)">
+            </div>
+            <div id="uploadForm" style="display: none; margin-top: 20px;">
+                <input type="text" id="modelName" placeholder="Enter model name (e.g., My 3D Sculpture)" style="width: 100%; padding: 15px; margin-bottom: 15px; border-radius: 10px; border: none; background: rgba(255,255,255,0.1); color: white;">
+                <button class="upload-btn" onclick="uploadFile()" id="uploadButton">
+                    <i class="fas fa-rocket"></i> Generate 3D Model
+                </button>
+            </div>
+        </section>
+
+        <section class="models-section" id="models">
+            <h2 class="section-title">Your 3D Creations</h2>
+            <div class="models-grid">
+                {% if models %}
+                    {% for model in models %}
+                    <div class="model-card">
+                        <div class="model-name">{{ model.name }}</div>
+                        <div class="model-info">
+                            <span class="quality-badge quality-{{ model.quality }}">{{ model.quality }}</span>
+                            <span><i class="far fa-calendar"></i> {{ model.created_at[:10] }}</span>
+                        </div>
+                        <div class="model-actions">
+                            <a href="/model/{{ model.id }}" class="action-btn view-btn">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                            <a href="/download_glb/{{ model.id }}" class="action-btn download-btn">
+                                <i class="fas fa-download"></i> GLB
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="no-models">
+                        <i class="fas fa-cube"></i>
+                        <h3>No 3D models yet</h3>
+                        <p>Upload your first image to create magic! ✨</p>
+                        <p><small>Or try our AI Text-to-3D feature</small></p>
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+
+        <footer>
+            <p>3D Magic Studio &copy; 2024 | Powered by Advanced AI Technology | Background Removal | Text-to-3D | Ultra Quality</p>
+        </footer>
+    </div>
+
+    <!-- Particles.js Script -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        // Initialize Particles.js
+        particlesJS('particles-js', {
+            particles: {
+                number: { value: 80, density: { enable: true, value_area: 800 } },
+                color: { value: "#ffffff" },
+                shape: { type: "circle" },
+                opacity: { value: 0.1, random: true },
+                size: { value: 3, random: true },
+                line_linked: {
+                    enable: true,
+                    distance: 150,
+                    color: "#ffffff",
+                    opacity: 0.1,
+                    width: 1
+                },
+                move: {
+                    enable: true,
+                    speed: 2,
+                    direction: "none",
+                    random: true,
+                    straight: false,
+                    out_mode: "out",
+                    bounce: false
+                }
+            },
+            interactivity: {
+                detect_on: "canvas",
+                events: {
+                    onhover: { enable: true, mode: "repulse" },
+                    onclick: { enable: true, mode: "push" },
+                    resize: true
+                }
+            }
+        });
+
+        let selectedFile = null;
+
+        function handleFileSelect(files) {
+            if (files.length > 0) {
+                selectedFile = files[0];
+                document.getElementById('uploadForm').style.display = 'block';
+                
+                // Auto-generate model name from filename
+                const fileName = files[0].name.replace(/\.[^/.]+$/, "");
+                document.getElementById('modelName').value = fileName + ' 3D Model';
+                
+                // Scroll to upload form
+                document.getElementById('uploadForm').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function uploadFile() {
+            if (!selectedFile) {
+                alert('Please select a file first!');
+                return;
+            }
+
+            const modelName = document.getElementById('modelName').value || 'My 3D Model';
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            formData.append('model_name', modelName);
+
+            // Show loading overlay
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const uploadBtn = document.getElementById('uploadButton');
+            
+            loadingOverlay.style.display = 'flex';
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success message
+                    loadingOverlay.querySelector('h3').textContent = '🎉 3D Model Created!';
+                    loadingOverlay.querySelector('p').textContent = 'Your model is ready to view!';
+                    
+                    // Reload page after delay
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                } else {
+                    loadingOverlay.style.display = 'none';
+                    alert('❌ ' + data.error);
+                }
+            })
+            .catch(error => {
+                loadingOverlay.style.display = 'none';
+                alert('❌ Upload failed: ' + error);
+            })
+            .finally(() => {
+                uploadBtn.disabled = false;
+                uploadBtn.innerHTML = '<i class="fas fa-rocket"></i> Generate 3D Model';
+            });
+        }
+
+        // Drag and drop functionality
+        const uploadArea = document.querySelector('.upload-area');
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = 'var(--primary)';
+            uploadArea.style.background = 'rgba(99, 102, 241, 0.2)';
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+            uploadArea.style.background = 'transparent';
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+            uploadArea.style.background = 'transparent';
+            
+            if (e.dataTransfer.files.length) {
+                handleFileSelect(e.dataTransfer.files);
+            }
+        });
+
+        // Smooth scroll for quick actions
+        document.querySelectorAll('.quick-action-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                if (btn.getAttribute('href').startsWith('#')) {
+                    e.preventDefault();
+                    const target = document.querySelector(btn.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

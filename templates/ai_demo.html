@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Magic Studio - AI Text to 3D</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #f59e0b;
+            --secondary-dark: #d97706;
+            --accent: #ec4899;
+            --dark: #0f172a;
+            --darker: #020617;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--darker), var(--dark));
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: var(--light);
+        }
+
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-text {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: white;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .dashboard-btn {
+            background: linear-gradient(135deg, var(--secondary), var(--secondary-dark));
+        }
+
+        .logout-btn {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .ai-studio-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 1024px) {
+            .ai-studio-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel-card {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--card-border);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .panel-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+        }
+
+        .panel-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .panel-header h2 {
+            color: white;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ai-badge {
+            background: linear-gradient(135deg, var(--accent), var(--primary));
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* AI Form Styles */
+        .advanced-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .form-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .char-count {
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        .prompt-textarea {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 15px;
+            color: white;
+            font-size: 16px;
+            resize: vertical;
+            min-height: 120px;
+            transition: all 0.3s ease;
+        }
+
+        .prompt-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .advanced-settings {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .setting-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .setting-group label {
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .slider-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        .material-select, .quality-select, .model-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 12px;
+            color: white;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn-generate {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            padding: 18px 30px;
+            border: none;
+            border-radius: 15px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-generate:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-generate:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-icon {
+            font-size: 1.2rem;
+        }
+
+        .btn-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+        }
+
+        /* Quick Prompts */
+        .quick-prompts {
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid var(--card-border);
+        }
+
+        .quick-prompts h4 {
+            color: white;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .prompt-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .prompt-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid var(--card-border);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .prompt-card:hover {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .prompt-icon {
+            font-size: 1.2rem;
+        }
+
+        /* 3D Viewer */
+        .model-viewer {
+            width: 100%;
+            height: 400px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .viewer-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: rgba(255, 255, 255, 0.5);
+            text-align: center;
+        }
+
+        .placeholder-icon {
+            font-size: 4rem;
+            margin-bottom: 15px;
+            opacity: 0.3;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-control {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.8rem;
+        }
+
+        .btn-control:hover, .btn-control.active {
+            background: var(--primary);
+        }
+
+        /* Progress Panel */
+        .progress-panel {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 12px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .progress-stats {
+            display: flex;
+            gap: 15px;
+            font-size: 0.9rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success), #34d399);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .progress-steps {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .step {
+            text-align: center;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            font-size: 0.8rem;
+            opacity: 0.5;
+            transition: all 0.3s ease;
+        }
+
+        .step.active {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .step.completed {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        /* Results Panel */
+        .results-panel {
+            margin-top: 20px;
+            padding: 25px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 15px;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .success-badge {
+            background: var(--success);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .action-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .action-btn.primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .texture-options {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .texture-options h5 {
+            color: white;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .texture-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .texture-btn {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.8rem;
+            border: 1px solid transparent;
+        }
+
+        .texture-btn:hover {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: var(--primary);
+        }
+
+        /* Model Stats */
+        .model-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* Recent Models */
+        .recent-models {
+            margin-top: 40px;
+        }
+
+        .recent-models h3 {
+            color: white;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .models-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .model-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid var(--card-border);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .model-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .model-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .model-card-header h4 {
+            color: white;
+            font-size: 1.1rem;
+        }
+
+        .model-prompt {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .model-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        /* Utility Classes */
+        .hidden {
+            display: none !important;
+        }
+
+        .floating-objects {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .floating-object {
+            position: absolute;
+            font-size: 2rem;
+            opacity: 0.1;
+            animation: floatObject 20s linear infinite;
+        }
+
+        @keyframes floatObject {
+            0% { transform: translateY(100vh) rotate(0deg); }
+            100% { transform: translateY(-100px) rotate(360deg); }
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 60px;
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .ai-studio-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .advanced-settings, .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .texture-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .model-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            header {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Particles.js Background -->
+    <div id="particles-js"></div>
+
+    <!-- Floating 3D Objects -->
+    <div class="floating-objects">
+        <div class="floating-object" style="left: 10%; animation-delay: 0s;"><i class="fas fa-robot"></i></div>
+        <div class="floating-object" style="left: 20%; animation-delay: 2s;"><i class="fas fa-brain"></i></div>
+        <div class="floating-object" style="left: 30%; animation-delay: 4s;"><i class="fas fa-cube"></i></div>
+        <div class="floating-object" style="left: 40%; animation-delay: 6s;"><i class="fas fa-magic"></i></div>
+        <div class="floating-object" style="left: 50%; animation-delay: 8s;"><i class="fas fa-robot"></i></div>
+        <div class="floating-object" style="left: 60%; animation-delay: 10s;"><i class="fas fa-brain"></i></div>
+        <div class="floating-object" style="left: 70%; animation-delay: 12s;"><i class="fas fa-cube"></i></div>
+        <div class="floating-object" style="left: 80%; animation-delay: 14s;"><i class="fas fa-magic"></i></div>
+    </div>
+
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon"><i class="fas fa-robot"></i></div>
+                <div class="logo-text">AI 3D Studio</div>
+            </div>
+            <div class="user-info">
+                <div class="user-avatar">{{ session.username[0] | upper }}</div>
+                <span>Welcome, {{ session.username }}! 👋</span>
+                <div class="nav-buttons">
+                    <a href="/dashboard" class="nav-btn dashboard-btn">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                    <a href="/logout" class="nav-btn logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <div class="ai-studio-grid">
+            <!-- Left Panel: AI Controls -->
+            <div class="control-panel">
+                <div class="panel-card">
+                    <div class="panel-header">
+                        <h2><i class="fas fa-robot"></i> AI Model Generator</h2>
+                        <div class="ai-badge">NEURAL NETWORK</div>
+                    </div>
+
+                    <!-- Advanced Prompt Engineering -->
+                    <form id="aiForm" class="advanced-form">
+                        <div class="form-section">
+                            <label class="form-label">
+                                <span><i class="fas fa-magic"></i> Creative Prompt</span>
+                                <span class="char-count" id="promptCount">0/500</span>
+                            </label>
+                            <textarea 
+                                id="prompt" 
+                                name="prompt" 
+                                placeholder="Describe your 3D model in detail... 
+Example: 'A futuristic cyberpunk sword with glowing blue edges, intricate circuit patterns, and metallic finish'"
+                                rows="5"
+                                maxlength="500"
+                                class="prompt-textarea"
+                            ></textarea>
+                        </div>
+
+                        <!-- Advanced Settings -->
+                        <div class="advanced-settings">
+                            <div class="setting-group">
+                                <label><i class="fas fa-sliders-h"></i> Model Complexity</label>
+                                <div class="slider-container">
+                                    <input type="range" id="complexity" min="1" max="3" value="2" class="slider">
+                                    <div class="slider-labels">
+                                        <span>Fast</span>
+                                        <span>Balanced</span>
+                                        <span>Ultra</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="setting-group">
+                                <label><i class="fas fa-gem"></i> Material Type</label>
+                                <select id="materialType" class="material-select">
+                                    <option value="auto">Auto-Detect</option>
+                                    <option value="metal">Metal</option>
+                                    <option value="plastic">Plastic</option>
+                                    <option value="glass">Glass</option>
+                                    <option value="wood">Wood</option>
+                                    <option value="crystal">Crystal</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label><i class="fas fa-tag"></i> Model Name</label>
+                                <input type="text" id="modelName" value="AI Masterpiece" class="model-input">
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-star"></i> Quality Level</label>
+                                <select id="quality" class="quality-select">
+                                    <option value="standard">Standard</option>
+                                    <option value="premium">Premium</option>
+                                    <option value="ultra">Ultra HD</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-generate" id="generateBtn">
+                            <span class="btn-icon">🚀</span>
+                            GENERATE 3D MODEL
+                            <span class="btn-badge">AI POWERED</span>
+                        </button>
+                    </form>
+
+                    <!-- Quick Prompts -->
+                    <div class="quick-prompts">
+                        <h4><i class="fas fa-bolt"></i> Quick Templates</h4>
+                        <div class="prompt-grid">
+                            <div class="prompt-card" data-prompt="Futuristic neon sword with energy glow">
+                                <div class="prompt-icon">⚔️</div>
+                                <span>Energy Sword</span>
+                            </div>
+                            <div class="prompt-card" data-prompt="Crystal sphere with internal refraction">
+                                <div class="prompt-icon">🔮</div>
+                                <span>Crystal Ball</span>
+                            </div>
+                            <div class="prompt-card" data-prompt="Ancient artifact with glowing runes">
+                                <div class="prompt-icon">🏺</div>
+                                <span>Ancient Artifact</span>
+                            </div>
+                            <div class="prompt-card" data-prompt="Mechanical robot arm with joints">
+                                <div class="prompt-icon">🤖</div>
+                                <span>Robot Arm</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Generation Progress -->
+                <div id="generationProgress" class="progress-panel hidden">
+                    <div class="progress-header">
+                        <h3><i class="fas fa-brain"></i> AI Processing</h3>
+                        <div class="progress-stats">
+                            <span id="progressText">Initializing Neural Network...</span>
+                            <span id="progressPercent">0%</span>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-steps">
+                        <div class="step active" data-step="1">Analyzing Prompt</div>
+                        <div class="step" data-step="2">Generating Geometry</div>
+                        <div class="step" data-step="3">Applying Materials</div>
+                        <div class="step" data-step="4">Finalizing Model</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: 3D Preview -->
+            <div class="preview-panel">
+                <div class="panel-card">
+                    <div class="panel-header">
+                        <h2><i class="fas fa-eye"></i> Live Preview</h2>
+                        <div class="controls">
+                            <button id="resetView" class="btn-control">🔄 Reset</button>
+                            <button id="autoRotate" class="btn-control active">🔄 Auto</button>
+                        </div>
+                    </div>
+                    
+                    <!-- 3D Viewer Container -->
+                    <div id="modelViewer" class="model-viewer">
+                        <div class="viewer-placeholder">
+                            <div class="placeholder-icon">🎭</div>
+                            <p>Your AI-generated model will appear here</p>
+                            <small>Live 3D preview with real-time rendering</small>
+                        </div>
+                    </div>
+
+                    <!-- Model Stats -->
+                    <div class="model-stats hidden" id="modelStats">
+                        <div class="stat">
+                            <span class="stat-label">Vertices</span>
+                            <span class="stat-value" id="vertexCount">0</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Faces</span>
+                            <span class="stat-value" id="faceCount">0</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Quality</span>
+                            <span class="stat-value" id="qualityLabel">-</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Size</span>
+                            <span class="stat-value" id="modelSize">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Panel -->
+                <div id="resultsPanel" class="results-panel hidden">
+                    <div class="results-header">
+                        <h3>✅ Generation Complete!</h3>
+                        <div class="success-badge">AI SUCCESS</div>
+                    </div>
+                    
+                    <div class="results-content">
+                        <div class="model-info">
+                            <h4 id="resultModelName">Model Name</h4>
+                            <p id="resultPrompt" class="model-prompt"></p>
+                        </div>
+                        
+                        <div class="action-grid">
+                            <a href="#" id="viewModel" class="action-btn primary">
+                                <span class="action-icon">👀</span>
+                                View in Studio
+                            </a>
+                            <a href="#" id="downloadGLB" class="action-btn">
+                                <span class="action-icon">📥</span>
+                                Download GLB
+                            </a>
+                            <a href="#" id="downloadFBX" class="action-btn">
+                                <span class="action-icon">📦</span>
+                                Download FBX
+                            </a>
+                            <button id="regenerate" class="action-btn">
+                                <span class="action-icon">🔄</span>
+                                Regenerate
+                            </button>
+                        </div>
+
+                        <!-- Texture Options -->
+                        <div class="texture-options">
+                            <h5><i class="fas fa-palette"></i> Apply Texture</h5>
+                            <div class="texture-grid">
+                                <div class="texture-btn" data-texture="metal">Metal</div>
+                                <div class="texture-btn" data-texture="gold">Gold</div>
+                                <div class="texture-btn" data-texture="silver">Silver</div>
+                                <div class="texture-btn" data-texture="glass">Glass</div>
+                                <div class="texture-btn" data-texture="crystal">Crystal</div>
+                                <div class="texture-btn" data-texture="wood">Wood</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Generations -->
+        <div class="recent-models">
+            <h3><i class="fas fa-history"></i> Recent AI Creations</h3>
+            <div id="recentModels" class="models-grid">
+                <!-- Dynamically loaded -->
+                <div class="no-models">
+                    <p>No recent AI models yet. Generate your first masterpiece! ✨</p>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>AI 3D Studio &copy; 2024 | Powered by Advanced Neural Networks | Real-time 3D Generation | Ultra Quality Models</p>
+        </footer>
+    </div>
+
+    <!-- Particles.js Script -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script src="{{ url_for('static', filename='js/ai_demo.js') }}"></script>
+    <script>
+        // Initialize Particles.js
+        particlesJS('particles-js', {
+            particles: {
+                number: { value: 60, density: { enable: true, value_area: 800 } },
+                color: { value: "#6366f1" },
+                shape: { type: "circle" },
+                opacity: { value: 0.2, random: true },
+                size: { value: 3, random: true },
+                line_linked: {
+                    enable: true,
+                    distance: 150,
+                    color: "#6366f1",
+                    opacity: 0.1,
+                    width: 1
+                },
+                move: {
+                    enable: true,
+                    speed: 1.5,
+                    direction: "none",
+                    random: true,
+                    straight: false,
+                    out_mode: "out",
+                    bounce: false
+                }
+            },
+            interactivity: {
+                detect_on: "canvas",
+                events: {
+                    onhover: { enable: true, mode: "repulse" },
+                    onclick: { enable: true, mode: "push" },
+                    resize: true
+                }
+            }
+        });
+
+        // Quick prompt functionality
+        document.querySelectorAll('.prompt-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const prompt = card.dataset.prompt;
+                document.getElementById('prompt').value = prompt;
+                
+                // Update character count
+                const count = prompt.length;
+                document.getElementById('promptCount').textContent = `${count}/500`;
+            });
+        });
+
+        // Prompt character count
+        document.getElementById('prompt').addEventListener('input', function(e) {
+            const count = e.target.value.length;
+            document.getElementById('promptCount').textContent = `${count}/500`;
+            
+            // Color coding
+            const countElement = document.getElementById('promptCount');
+            if (count > 400) {
+                countElement.style.color = '#ef4444';
+            } else if (count > 200) {
+                countElement.style.color = '#f59e0b';
+            } else {
+                countElement.style.color = '#10b981';
+            }
+        });
+    </script>
+</body>
+</html>

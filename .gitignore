@@ -218,3 +218,11 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+# DimenX - Generated 3D Models
+models/*.glb
+models/*.fbx
+
+# AI Model Weights
+*.pth
+*.pt
+*.onnx

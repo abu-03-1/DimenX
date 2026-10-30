@@ -1,0 +1,1582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ model.name }} - 3D Magic Studio</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --secondary: #f59e0b;
+            --secondary-dark: #d97706;
+            --secondary-light: #fbbf24;
+            --accent: #ec4899;
+            --accent-dark: #db2777;
+            --accent-light: #f472b6;
+            --success: #10b981;
+            --success-dark: #059669;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --dark: #0f172a;
+            --darker: #020617;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --gray-light: #94a3b8;
+            --card-bg: rgba(30, 41, 59, 0.8);
+            --card-bg-hover: rgba(30, 41, 59, 0.9);
+            --card-border: rgba(255, 255, 255, 0.15);
+            --card-border-hover: rgba(255, 255, 255, 0.25);
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-bg-hover: rgba(255, 255, 255, 0.12);
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+            --shadow-2xl: 0 25px 50px rgba(0, 0, 0, 0.25);
+            --border-radius-sm: 8px;
+            --border-radius-md: 12px;
+            --border-radius-lg: 16px;
+            --border-radius-xl: 20px;
+            --border-radius-2xl: 24px;
+            --gradient-primary: linear-gradient(135deg, var(--primary), var(--accent));
+            --gradient-secondary: linear-gradient(135deg, var(--secondary), var(--accent));
+            --gradient-success: linear-gradient(135deg, var(--success), var(--success-dark));
+            --gradient-card: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(236, 72, 153, 0.1));
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--darker), var(--dark));
+            min-height: 100vh;
+            color: var(--light);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ===== HEADER STYLES ===== */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 0;
+            margin-bottom: 40px;
+            border-bottom: 1px solid var(--card-border);
+            position: relative;
+        }
+
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .back-btn {
+            background: var(--glass-bg);
+            color: white;
+            padding: 14px 28px;
+            border-radius: var(--border-radius-lg);
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .back-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.6s;
+        }
+
+        .back-btn:hover::before {
+            left: 100%;
+        }
+
+        .back-btn:hover {
+            background: var(--glass-bg-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary);
+        }
+
+        .model-title {
+            font-size: 2.8rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .quality-badge {
+            background: var(--gradient-secondary);
+            color: white;
+            padding: 10px 24px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 700;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* ===== MAIN CONTENT SECTIONS ===== */
+        .model-viewer-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 50px;
+        }
+
+        .preview-container {
+            background: var(--card-bg);
+            border-radius: var(--border-radius-2xl);
+            padding: 40px;
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--card-border);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-2xl);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .preview-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--gradient-primary);
+        }
+
+        .preview-container:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+            background: var(--card-bg-hover);
+        }
+
+        .preview-placeholder {
+            font-size: 8rem;
+            margin-bottom: 30px;
+            animation: float 4s ease-in-out infinite;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 10px 20px rgba(99, 102, 241, 0.3));
+        }
+
+        @keyframes float {
+            0%, 100% { 
+                transform: translateY(0px) rotate(0deg) scale(1);
+            }
+            33% { 
+                transform: translateY(-15px) rotate(3deg) scale(1.05);
+            }
+            66% { 
+                transform: translateY(8px) rotate(-2deg) scale(0.98);
+            }
+        }
+
+        .preview-title {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: var(--primary-light);
+            font-weight: 700;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .preview-description {
+            color: var(--gray-light);
+            margin-bottom: 35px;
+            line-height: 1.7;
+            font-size: 1.15rem;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .info-container {
+            background: var(--card-bg);
+            border-radius: var(--border-radius-2xl);
+            padding: 40px;
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--card-border);
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-2xl);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .info-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--gradient-secondary);
+        }
+
+        .info-container:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+            background: var(--card-bg-hover);
+        }
+
+        .info-title {
+            font-size: 1.9rem;
+            margin-bottom: 30px;
+            color: var(--accent-light);
+            text-align: center;
+            font-weight: 700;
+            background: var(--gradient-secondary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .info-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 18px 0;
+            border-bottom: 1px solid var(--card-border);
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .info-item:hover {
+            background: var(--gradient-card);
+            margin: 0 -10px;
+            padding: 18px 10px;
+            border-radius: var(--border-radius-md);
+            border-bottom-color: transparent;
+        }
+
+        .info-label {
+            font-weight: 700;
+            color: var(--primary-light);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.05rem;
+        }
+
+        .info-value {
+            color: var(--gray-light);
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+
+        /* ===== TEXTURE SECTION ===== */
+        .texture-section {
+            background: var(--card-bg);
+            border-radius: var(--border-radius-2xl);
+            padding: 50px;
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--card-border);
+            margin-bottom: 50px;
+            box-shadow: var(--shadow-2xl);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .texture-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #ec4899, #8b5cf6, #06b6d4);
+        }
+
+        .texture-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .texture-card {
+            background: var(--glass-bg);
+            padding: 35px 30px;
+            border-radius: var(--border-radius-xl);
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid var(--card-border);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .texture-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #ec4899, #8b5cf6);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
+        }
+
+        .texture-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .texture-card:hover {
+            transform: translateY(-10px);
+            background: var(--glass-bg-hover);
+            border-color: #8b5cf6;
+            box-shadow: var(--shadow-2xl);
+        }
+
+        .texture-icon {
+            font-size: 4rem;
+            margin-bottom: 25px;
+            background: linear-gradient(135deg, #ec4899, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 5px 15px rgba(139, 92, 246, 0.3));
+        }
+
+        .texture-name {
+            font-size: 1.5rem;
+            margin-bottom: 18px;
+            color: #c4b5fd;
+            font-weight: 700;
+        }
+
+        .texture-desc {
+            color: var(--gray-light);
+            margin-bottom: 25px;
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        .texture-btn {
+            background: linear-gradient(135deg, #ec4899, #8b5cf6);
+            color: white;
+            padding: 16px 32px;
+            border: none;
+            border-radius: var(--border-radius-lg);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            font-size: 1.05rem;
+            cursor: pointer;
+            min-width: 180px;
+        }
+
+        .texture-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(139, 92, 246, 0.4);
+        }
+
+        .texture-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .color-palette {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .color-swatch {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .color-swatch:hover {
+            transform: scale(1.2);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* ===== DOWNLOAD SECTION ===== */
+        .download-section {
+            background: var(--card-bg);
+            border-radius: var(--border-radius-2xl);
+            padding: 50px;
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--card-border);
+            margin-bottom: 50px;
+            box-shadow: var(--shadow-2xl);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .download-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent), var(--secondary));
+        }
+
+        .section-title {
+            font-size: 2.4rem;
+            margin-bottom: 45px;
+            text-align: center;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 4px;
+            background: var(--gradient-primary);
+            border-radius: 2px;
+        }
+
+        .download-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .download-card {
+            background: var(--glass-bg);
+            padding: 35px 30px;
+            border-radius: var(--border-radius-xl);
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid var(--card-border);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .download-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--gradient-primary);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
+        }
+
+        .download-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .download-card:hover {
+            transform: translateY(-10px);
+            background: var(--glass-bg-hover);
+            border-color: var(--primary);
+            box-shadow: var(--shadow-2xl);
+        }
+
+        .download-icon {
+            font-size: 4rem;
+            margin-bottom: 25px;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 5px 15px rgba(99, 102, 241, 0.3));
+        }
+
+        .download-name {
+            font-size: 1.5rem;
+            margin-bottom: 18px;
+            color: var(--primary-light);
+            font-weight: 700;
+        }
+
+        .download-desc {
+            color: var(--gray-light);
+            margin-bottom: 25px;
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        .download-btn {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 16px 32px;
+            border: none;
+            border-radius: var(--border-radius-lg);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            font-size: 1.05rem;
+            cursor: pointer;
+            min-width: 180px;
+        }
+
+        .download-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.6s ease;
+            opacity: 0;
+        }
+
+        .download-btn:hover::after {
+            animation: shine 1.5s ease;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(99, 102, 241, 0.4);
+        }
+
+        .download-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .gib-btn {
+            background: var(--gradient-secondary);
+        }
+
+        .gib-btn:hover {
+            box-shadow: 0 12px 25px rgba(245, 158, 11, 0.4);
+        }
+
+        .preview-btn {
+            background: var(--gradient-success);
+        }
+
+        .preview-btn:hover {
+            box-shadow: 0 12px 25px rgba(16, 185, 129, 0.4);
+        }
+
+        .fbx-btn {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        }
+
+        .fbx-btn:hover {
+            box-shadow: 0 12px 25px rgba(139, 92, 246, 0.4);
+        }
+
+        .converting-btn {
+            background: linear-gradient(135deg, var(--warning), #ea580c);
+        }
+
+        /* ===== PROGRESS BAR ===== */
+        .progress-container {
+            margin-top: 15px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 4px;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-primary);
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .progress-text {
+            font-size: 0.9rem;
+            color: var(--gray-light);
+            margin-top: 8px;
+            font-weight: 600;
+        }
+
+        /* ===== VARIANTS SECTION ===== */
+        .variants-section {
+            background: var(--card-bg);
+            border-radius: var(--border-radius-2xl);
+            padding: 50px;
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--card-border);
+            margin-bottom: 50px;
+            box-shadow: var(--shadow-2xl);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .variants-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent), var(--secondary));
+        }
+
+        .variants-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 25px;
+        }
+
+        .variant-card {
+            background: var(--glass-bg);
+            padding: 30px 25px;
+            border-radius: var(--border-radius-lg);
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid var(--card-border);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .variant-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-light));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+
+        .variant-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .variant-card:hover {
+            transform: translateY(-6px);
+            background: var(--glass-bg-hover);
+            border-color: var(--accent);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .variant-name {
+            font-size: 1.3rem;
+            margin-bottom: 18px;
+            color: var(--accent-light);
+            font-weight: 600;
+        }
+
+        .variant-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: var(--border-radius-md);
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--card-border);
+        }
+
+        .variant-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* ===== STATS & ACTIONS ===== */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+            margin-top: 35px;
+        }
+
+        .stat-card {
+            background: var(--glass-bg);
+            padding: 30px 25px;
+            border-radius: var(--border-radius-lg);
+            text-align: center;
+            border: 1px solid var(--card-border);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            background: var(--glass-bg-hover);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-value {
+            font-size: 2.8rem;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 5px 15px rgba(99, 102, 241, 0.3));
+        }
+
+        .stat-label {
+            color: var(--gray-light);
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .model-actions {
+            display: flex;
+            gap: 20px;
+            margin-top: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 14px 28px;
+            border-radius: var(--border-radius-lg);
+            text-decoration: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 1.05rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .share-btn {
+            background: var(--glass-bg);
+            color: white;
+            border: 1px solid var(--card-border);
+        }
+
+        .share-btn:hover {
+            background: var(--glass-bg-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary);
+        }
+
+        .export-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            color: white;
+            border: none;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(236, 72, 153, 0.4);
+        }
+
+        /* ===== FLOATING OBJECTS ===== */
+        .floating-objects {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .floating-object {
+            position: absolute;
+            font-size: 2.5rem;
+            opacity: 0.08;
+            animation: floatObject 25s linear infinite;
+            filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.1));
+        }
+
+        @keyframes floatObject {
+            0% { 
+                transform: translateY(100vh) rotate(0deg) scale(1);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.08;
+            }
+            90% {
+                opacity: 0.08;
+            }
+            100% { 
+                transform: translateY(-100px) rotate(360deg) scale(1.2);
+                opacity: 0;
+            }
+        }
+
+        /* ===== NOTIFICATION SYSTEM ===== */
+        .notification {
+            position: fixed;
+            top: 25px;
+            right: 25px;
+            padding: 18px 24px;
+            border-radius: var(--border-radius-lg);
+            color: white;
+            font-weight: 600;
+            z-index: 10000;
+            animation: slideInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 400px;
+            box-shadow: var(--shadow-2xl);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .notification.success {
+            background: linear-gradient(135deg, var(--success), var(--success-dark));
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, var(--error), #dc2626);
+        }
+
+        .notification.warning {
+            background: linear-gradient(135deg, var(--warning), #ea580c);
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); opacity: 0; }
+        }
+
+        /* ===== RESPONSIVE DESIGN ===== */
+        @media (max-width: 1024px) {
+            .model-viewer-section {
+                gap: 30px;
+            }
+            
+            .download-grid, .texture-grid {
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .model-viewer-section {
+                grid-template-columns: 1fr;
+                gap: 25px;
+            }
+            
+            .model-title {
+                font-size: 2.2rem;
+            }
+            
+            .download-grid, .texture-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .variants-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-left {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
+            }
+            
+            .preview-container, .info-container, .download-section, .variants-section, .texture-section {
+                padding: 30px 20px;
+            }
+            
+            .section-title {
+                font-size: 2rem;
+            }
+            
+            .model-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .action-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .model-title {
+                font-size: 1.8rem;
+            }
+            
+            .preview-title, .info-title, .section-title {
+                font-size: 1.6rem;
+            }
+            
+            .download-btn, .texture-btn {
+                padding: 14px 24px;
+                font-size: 1rem;
+            }
+            
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ===== RIPPLE EFFECT ===== */
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        .ripple {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ripple-effect {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.6);
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Particles.js Background -->
+    <div id="particles-js"></div>
+
+    <!-- Floating 3D Objects -->
+    <div class="floating-objects">
+        <div class="floating-object" style="left: 5%; animation-delay: 0s;"><i class="fas fa-cube"></i></div>
+        <div class="floating-object" style="left: 15%; animation-delay: 3s;"><i class="fas fa-dice-d20"></i></div>
+        <div class="floating-object" style="left: 25%; animation-delay: 6s;"><i class="fas fa-ring"></i></div>
+        <div class="floating-object" style="left: 35%; animation-delay: 9s;"><i class="fas fa-gem"></i></div>
+        <div class="floating-object" style="left: 45%; animation-delay: 12s;"><i class="fas fa-circle"></i></div>
+        <div class="floating-object" style="left: 55%; animation-delay: 15s;"><i class="fas fa-cube"></i></div>
+        <div class="floating-object" style="left: 65%; animation-delay: 18s;"><i class="fas fa-dice-d20"></i></div>
+        <div class="floating-object" style="left: 75%; animation-delay: 21s;"><i class="fas fa-ring"></i></div>
+        <div class="floating-object" style="left: 85%; animation-delay: 24s;"><i class="fas fa-gem"></i></div>
+        <div class="floating-object" style="left: 95%; animation-delay: 27s;"><i class="fas fa-circle"></i></div>
+    </div>
+
+    <div class="container">
+        <header>
+            <div class="header-left">
+                <a href="/dashboard" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Studio</a>
+                <h1 class="model-title">{{ model.name }}</h1>
+                <span class="quality-badge"><i class="fas fa-crown"></i> {{ model.quality }} QUALITY</span>
+            </div>
+        </header>
+
+        <section class="model-viewer-section">
+            <div class="preview-container">
+                <div class="preview-placeholder"><i class="fas fa-cube"></i></div>
+                <h2 class="preview-title">3D Model Ready!</h2>
+                <p class="preview-description">
+                    Your professional 3D model has been generated with advanced AI technology 
+                    and is ready for download and use in your projects.
+                </p>
+                
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <div class="stat-value"><i class="fas fa-crown"></i></div>
+                        <div class="stat-label">ULTRA QUALITY</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value"><i class="fas fa-bolt"></i></div>
+                        <div class="stat-label">AI POWERED</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value"><i class="fas fa-ruler-combined"></i></div>
+                        <div class="stat-label">PRECISE</div>
+                    </div>
+                </div>
+
+                <div class="model-actions">
+                    <a href="#" class="action-btn share-btn">
+                        <i class="fas fa-share-alt"></i> Share
+                    </a>
+                    <a href="#" class="action-btn export-btn">
+                        <i class="fas fa-file-export"></i> Export
+                    </a>
+                </div>
+            </div>
+
+            <div class="info-container">
+                <h2 class="info-title">Model Information</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label"><i class="fas fa-fingerprint"></i> Model ID:</span>
+                        <span class="info-value">{{ model.id }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label"><i class="fas fa-calendar"></i> Created:</span>
+                        <span class="info-value">{{ model.created_at[:10] }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label"><i class="fas fa-star"></i> Quality Level:</span>
+                        <span class="info-value">{{ model.quality }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label"><i class="fas fa-file"></i> File Format:</span>
+                        <span class="info-value">GLB / GIB / FBX</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label"><i class="fas fa-plug"></i> Compatible With:</span>
+                        <span class="info-value">Blender, Unity, Maya, 3DS Max</span>
+                    </div>
+                    {% if model.original_image %}
+                    <div class="info-item">
+                        <span class="info-label"><i class="fas fa-image"></i> Source Image:</span>
+                        <span class="info-value">{{ model.original_image }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
+        <!-- TEXTURE SECTION - NEW -->
+        <section class="texture-section">
+            <h2 class="section-title">Apply Textures & Colors</h2>
+            <div class="texture-grid">
+                <!-- Image Color Texture -->
+                <div class="texture-card">
+                    <div class="texture-icon"><i class="fas fa-palette"></i></div>
+                    <h3 class="texture-name">Original Image Colors</h3>
+                    <p class="texture-desc">
+                        Apply colors extracted from your original image to create a 
+                        personalized texture that matches your source material
+                    </p>
+                    <div class="color-palette" id="colorPalette">
+                        <!-- Colors will be dynamically loaded -->
+                        <div class="color-swatch" style="background: #FF6B6B;"></div>
+                        <div class="color-swatch" style="background: #4ECDC4;"></div>
+                        <div class="color-swatch" style="background: #45B7D1;"></div>
+                    </div>
+                    <button class="texture-btn" onclick="applyImageTexture('{{ model.id }}')" id="imageTextureBtn">
+                        <i class="fas fa-magic"></i> Apply Image Colors
+                    </button>
+                    <div class="progress-container" id="imageTextureProgress" style="display: none;">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="imageTextureFill"></div>
+                        </div>
+                        <div class="progress-text" id="imageTextureText">Processing...</div>
+                    </div>
+                </div>
+
+                <!-- Material Textures -->
+                <div class="texture-card">
+                    <div class="texture-icon"><i class="fas fa-gem"></i></div>
+                    <h3 class="texture-name">Material Textures</h3>
+                    <p class="texture-desc">
+                        Choose from premium material textures including metal, wood, 
+                        glass, and crystal for professional-looking results
+                    </p>
+                    <div class="model-actions">
+                        <button class="variant-btn" onclick="applyTexture('{{ model.id }}', 'metal')">
+                            <i class="fas fa-hammer"></i> Metal
+                        </button>
+                        <button class="variant-btn" onclick="applyTexture('{{ model.id }}', 'wood')">
+                            <i class="fas fa-tree"></i> Wood
+                        </button>
+                        <button class="variant-btn" onclick="applyTexture('{{ model.id }}', 'glass')">
+                            <i class="fas fa-wine-glass"></i> Glass
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Premium Textures -->
+                <div class="texture-card">
+                    <div class="texture-icon"><i class="fas fa-crown"></i></div>
+                    <h3 class="texture-name">Premium Materials</h3>
+                    <p class="texture-desc">
+                        Ultra-quality materials with realistic reflections, 
+                        including gold, silver, and crystal for stunning visual effects
+                    </p>
+                    <div class="model-actions">
+                        <button class="variant-btn" onclick="applyTexture('{{ model.id }}', 'gold')">
+                            <i class="fas fa-coins"></i> Gold
+                        </button>
+                        <button class="variant-btn" onclick="applyTexture('{{ model.id }}', 'silver')">
+                            <i class="fas fa-ring"></i> Silver
+                        </button>
+                        <button class="variant-btn" onclick="applyTexture('{{ model.id }}', 'crystal')">
+                            <i class="fas fa-gem"></i> Crystal
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- DOWNLOAD SECTION -->
+        <section class="download-section">
+            <h2 class="section-title">Download Your 3D Model</h2>
+            <div class="download-grid">
+                <!-- GLB Format -->
+                <div class="download-card">
+                    <div class="download-icon"><i class="fas fa-download"></i></div>
+                    <h3 class="download-name">GLB Format</h3>
+                    <p class="download-desc">Universal format for web, mobile, AR/VR applications and game engines</p>
+                    <a href="/download_glb/{{ model.id }}" class="download-btn">
+                        <i class="fas fa-download"></i> Download GLB
+                    </a>
+                </div>
+
+                <!-- GIB Format -->
+                <div class="download-card">
+                    <div class="download-icon"><i class="fas fa-database"></i></div>
+                    <h3 class="download-name">GIB Format</h3>
+                    <p class="download-desc">Proprietary format with enhanced details and metadata for advanced use</p>
+                    <a href="/download_gib/{{ model.id }}" class="download-btn gib-btn">
+                        <i class="fas fa-download"></i> Download GIB
+                    </a>
+                </div>
+
+                <!-- FBX Format -->
+                <div class="download-card">
+                    <div class="download-icon"><i class="fas fa-cube"></i></div>
+                    <h3 class="download-name">FBX Format</h3>
+                    <p class="download-desc">Industry standard for Unity, Maya, Blender, 3DS Max with animation support</p>
+                    <a href="/download_fbx/{{ model.id }}" class="download-btn fbx-btn">
+                        <i class="fas fa-download"></i> Download FBX
+                    </a>
+                </div>
+
+                <!-- Preview Link -->
+                <div class="download-card">
+                    <div class="download-icon"><i class="fas fa-eye"></i></div>
+                    <h3 class="download-name">3D Preview</h3>
+                    <p class="download-desc">View your model in browser before download with interactive 3D controls</p>
+                    {% if model.quality == 'ULTRA' %}
+                    <a href="/models/{{ model.id }}_ULTRA.glb" class="download-btn preview-btn" target="_blank">
+                        <i class="fas fa-external-link-alt"></i> View Preview
+                    </a>
+                    {% else %}
+                    <a href="/models/{{ model.id }}_main.glb" class="download-btn preview-btn" target="_blank">
+                        <i class="fas fa-external-link-alt"></i> View Preview
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
+        <!-- Ultra Quality Variants -->
+        {% if model.quality == 'ULTRA' and model.models %}
+        <section class="variants-section">
+            <h2 class="section-title">Ultra Quality Variants</h2>
+            <div class="variants-grid">
+                {% for model_type, model_info in model.models.items() %}
+                <div class="variant-card">
+                    <h3 class="variant-name">{{ model_type|upper }} Version</h3>
+                    <a href="/download_glb/{{ model.id }}" class="variant-btn">
+                        <i class="fas fa-download"></i> Download {{ model_type }}
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Parts Section for Basic Models -->
+        {% if model.parts %}
+        <section class="variants-section">
+            <h2 class="section-title">Model Parts & Components</h2>
+            <div class="variants-grid">
+                {% for part_name, part_data in model.parts.items() %}
+                <div class="variant-card">
+                    <h3 class="variant-name">{{ part_data.name }}</h3>
+                    <a href="/download_glb/{{ model.id }}" class="variant-btn">
+                        <i class="fas fa-download"></i> Download {{ part_data.name }}
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+    </div>
+
+    <!-- Particles.js Script -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        // Initialize Particles.js
+        particlesJS('particles-js', {
+            particles: {
+                number: { value: 80, density: { enable: true, value_area: 800 } },
+                color: { value: "#ffffff" },
+                shape: { type: "circle" },
+                opacity: { value: 0.05, random: true },
+                size: { value: 2, random: true },
+                line_linked: {
+                    enable: true,
+                    distance: 120,
+                    color: "#ffffff",
+                    opacity: 0.05,
+                    width: 1
+                },
+                move: {
+                    enable: true,
+                    speed: 1.5,
+                    direction: "none",
+                    random: true,
+                    straight: false,
+                    out_mode: "out",
+                    bounce: false
+                }
+            },
+            interactivity: {
+                detect_on: "canvas",
+                events: {
+                    onhover: { enable: true, mode: "repulse" },
+                    onclick: { enable: true, mode: "push" },
+                    resize: true
+                }
+            }
+        });
+
+        // Load color palette from original image
+        async function loadColorPalette(modelId) {
+            try {
+                const response = await fetch(`/api/extract_colors/${modelId}`);
+                const data = await response.json();
+                
+                if (data.success && data.colors) {
+                    const colorPalette = document.getElementById('colorPalette');
+                    colorPalette.innerHTML = '';
+                    
+                    data.colors.forEach(color => {
+                        const swatch = document.createElement('div');
+                        swatch.className = 'color-swatch';
+                        swatch.style.background = color;
+                        swatch.title = color;
+                        colorPalette.appendChild(swatch);
+                    });
+                }
+            } catch (error) {
+                console.error('Failed to load color palette:', error);
+            }
+        }
+
+        // Apply image texture
+        async function applyImageTexture(modelId) {
+            const btn = document.getElementById('imageTextureBtn');
+            const progress = document.getElementById('imageTextureProgress');
+            const progressFill = document.getElementById('imageTextureFill');
+            const progressText = document.getElementById('imageTextureText');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            progress.style.display = 'block';
+            
+            try {
+                // Simulate progress
+                let progressValue = 0;
+                const progressInterval = setInterval(() => {
+                    progressValue += 5;
+                    progressFill.style.width = `${progressValue}%`;
+                    if (progressValue >= 90) clearInterval(progressInterval);
+                }, 200);
+                
+                const response = await fetch(`/api/apply_image_texture/${modelId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                const data = await response.json();
+                
+                clearInterval(progressInterval);
+                progressFill.style.width = '100%';
+                
+                if (data.success) {
+                    progressText.textContent = '✅ Texture Applied!';
+                    showNotification('🎨 Image colors applied successfully!', 'success');
+                    
+                    setTimeout(() => {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-magic"></i> Apply Image Colors';
+                        progress.style.display = 'none';
+                        progressFill.style.width = '0%';
+                        progressText.textContent = 'Processing...';
+                    }, 2000);
+                } else {
+                    throw new Error(data.error);
+                }
+            } catch (error) {
+                console.error('Image texture error:', error);
+                progressText.textContent = '❌ Failed';
+                showNotification('❌ Failed to apply image texture: ' + error.message, 'error');
+                
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-magic"></i> Apply Image Colors';
+                    progress.style.display = 'none';
+                    progressFill.style.width = '0%';
+                    progressText.textContent = 'Processing...';
+                }, 3000);
+            }
+        }
+
+        // Apply material texture
+        async function applyTexture(modelId, textureType) {
+            const textureNames = {
+                'metal': 'Metal',
+                'wood': 'Wood', 
+                'glass': 'Glass',
+                'gold': 'Gold',
+                'silver': 'Silver',
+                'crystal': 'Crystal'
+            };
+            
+            try {
+                const response = await fetch(`/api/apply_texture/${modelId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        texture_type: textureType
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showNotification(`✅ ${textureNames[textureType]} texture applied!`, 'success');
+                } else {
+                    throw new Error(data.error);
+                }
+            } catch (error) {
+                console.error('Texture error:', error);
+                showNotification('❌ Failed to apply texture: ' + error.message, 'error');
+            }
+        }
+
+        // Notification System
+        function showNotification(message, type = 'success') {
+            // Remove existing notification
+            const existingNotification = document.querySelector('.notification');
+            if (existingNotification) {
+                existingNotification.remove();
+            }
+
+            // Create new notification
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'exclamation-triangle'}"></i>
+                ${message}
+            `;
+
+            document.body.appendChild(notification);
+
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        // Add click animation to buttons
+        document.querySelectorAll('.download-btn, .variant-btn, .texture-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                if (this.disabled) return;
+                
+                // Create ripple effect
+                const ripple = document.createElement('span');
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+                
+                ripple.style.cssText = `
+                    position: absolute;
+                    border-radius: 50%;
+                    background: rgba(255, 255, 255, 0.6);
+                    transform: scale(0);
+                    animation: ripple 0.6s linear;
+                    width: ${size}px;
+                    height: ${size}px;
+                    left: ${x}px;
+                    top: ${y}px;
+                    pointer-events: none;
+                `;
+                
+                this.style.position = 'relative';
+                this.style.overflow = 'hidden';
+                this.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            });
+        });
+
+        // Add hover effects for cards
+        document.querySelectorAll('.download-card, .variant-card, .stat-card, .texture-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-10px)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+
+        // Load color palette when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadColorPalette('{{ model.id }}');
+        });
+
+        // Add keyframes for ripple effect
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+            @keyframes shine {
+                0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); opacity: 0; }
+                50% { opacity: 1; }
+                100% { transform: translateX(100%) translateY(100%) rotate(45deg); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

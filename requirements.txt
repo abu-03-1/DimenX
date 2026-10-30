@@ -1,0 +1,14 @@
+flask
+werkzeug
+opencv-python
+pillow
+numpy
+torch
+torchvision
+open3d
+trimesh
+scipy
+scikit-learn
+pyrender
+transformers
+requests
